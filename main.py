@@ -46,7 +46,7 @@ async def upload_pdf(file: UploadFile = File(...)):
         if os.path.exists(pdf_path):
             os.remove(pdf_path)
 
-        return JSONResponse(content={"text": aggregated_text})
+        return JSONResponse(content={"text": aggregated_text , "TextPositions":text_positions})
         
 
     except Exception as e:
