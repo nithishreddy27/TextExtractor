@@ -3,10 +3,19 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 import re
 import os 
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
 
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Update this to your client's origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 def extract_text_with_positions(pdf_path):
     print("iNside positions")
     doc = fitz.open(pdf_path)
@@ -30,6 +39,7 @@ def extract_text_from_positions(text_positions):
 @app.post("/upload_pdf/")
 async def upload_pdf(file: UploadFile = File(...)):
     pdf_path = f"./{file.filename}"
+    print("new request came ",pdf_path)
     try:
         # Save the uploaded file
         with open(pdf_path, "wb") as f:
@@ -38,13 +48,14 @@ async def upload_pdf(file: UploadFile = File(...)):
         # Extract text positions and draw rectangles
         print("PDF Input Done")
         text_positions = extract_text_with_positions(pdf_path)
-        print("Posititons done ",text_positions)
+        # print("Posititons done ",text_positions)
         aggregated_text = extract_text_from_positions(text_positions)
-        print("Posititons done ",aggregated_text)
+        # print("Posititons done ",aggregated_text)
 
         # Cleanup files
         if os.path.exists(pdf_path):
             os.remove(pdf_path)
+        print("Operations done returning")
 
         return JSONResponse(content={"text": aggregated_text , "TextPositions":text_positions})
         
